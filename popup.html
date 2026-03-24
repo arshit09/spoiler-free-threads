@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 260px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    .status {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .status.active { color: #34a853; }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Refresh button */
+    .refresh-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      padding: 0;
+    }
+
+    .refresh-btn.visible { display: flex; }
+
+    .refresh-btn:hover { opacity: 0.8; }
+
+    .refresh-btn svg {
+      width: 16px;
+      height: 16px;
+      color: #fff;
+    }
+
+    /* Hint message */
+    .refresh-hint {
+      display: none;
+      font-size: 11px;
+      color: #999;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .refresh-hint.visible { display: block; }
+
+    /* Toggle switch */
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #ccc;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .switch input:checked + .slider {
+      background: #000;
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(18px);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="icon">👁</div>
+    <div>
+      <div class="title">Spoiler Free Threads</div>
+      <div class="subtitle">Auto-reveal hidden content</div>
+    </div>
+  </div>
+
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">Auto-reveal</div>
+      <div class="status" id="status">Enabled</div>
+    </div>
+    <div class="controls">
+      <button class="refresh-btn" id="refreshBtn" title="Refresh page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+        </svg>
+      </button>
+      <label class="switch">
+        <input type="checkbox" id="toggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="refresh-hint" id="refreshHint">Page reload required to take effect</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
