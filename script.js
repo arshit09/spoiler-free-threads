@@ -2,7 +2,7 @@
     'use strict';
 
     let observer = null;
-    let timeout = null;
+    let animationFrameId = null;
 
     function looksHidden(el) {
         const style = getComputedStyle(el);
@@ -15,7 +15,8 @@
 
     function revealSpoilers() {
         // Elements with blur filters
-        document.querySelectorAll('[style*="blur"], [style*="filter"]').forEach(element => {
+        document.querySelectorAll('[style*="blur"]:not([data-blur-checked]), [style*="filter"]:not([data-blur-checked])').forEach(element => {
+            element.dataset.blurChecked = 'true';
             const parent = element.closest('[role="button"], [tabindex="0"]');
             if (parent && !parent.dataset.revealed && looksHidden(element)) {
                 parent.click();
@@ -24,25 +25,28 @@
         });
 
         // Hidden/sensitive content by aria-label
-        document.querySelectorAll('[aria-label*="Hidden"], [aria-label*="Sensitive"], [aria-label*="spoiler" i]').forEach(element => {
-            if (!element.dataset.revealed) {
-                element.click();
-                element.dataset.revealed = 'true';
-            }
+        document.querySelectorAll('[aria-label*="Hidden"]:not([data-revealed]), [aria-label*="Sensitive"]:not([data-revealed]), [aria-label*="spoiler" i]:not([data-revealed])').forEach(element => {
+            element.click();
+            element.dataset.revealed = 'true';
         });
 
         // Buttons with spoiler-related text
-        document.querySelectorAll('[role="button"], button').forEach(button => {
+        document.querySelectorAll('[role="button"]:not([data-text-checked]), button:not([data-text-checked])').forEach(button => {
             const text = button.textContent?.toLowerCase() || '';
-            if ((text.includes('spoiler') || text.includes('sensitive') || text.includes('tap to view') || text.includes('click to view')) && !button.dataset.revealed) {
-                button.click();
-                button.dataset.revealed = 'true';
+            if (text.trim().length > 0) {
+                button.dataset.textChecked = 'true';
+                if ((text.includes('spoiler') || text.includes('sensitive') || text.includes('tap to view') || text.includes('click to view')) && !button.dataset.revealed) {
+                    button.click();
+                    button.dataset.revealed = 'true';
+                }
             }
         });
 
         // Media containers with blurred content
-        document.querySelectorAll('article div[role="button"]').forEach(container => {
-            if (container.querySelector('[style*="blur"]') && !container.dataset.revealed) {
+        document.querySelectorAll('article [style*="blur"]:not([data-media-blur-checked]), article [style*="filter"]:not([data-media-blur-checked])').forEach(blurEl => {
+            blurEl.dataset.mediaBlurChecked = 'true';
+            const container = blurEl.closest('div[role="button"]');
+            if (container && !container.dataset.revealed) {
                 container.click();
                 container.dataset.revealed = 'true';
             }
@@ -56,8 +60,12 @@
         }
         revealSpoilers();
         observer = new MutationObserver(() => {
-            clearTimeout(timeout);
-            timeout = setTimeout(revealSpoilers, 500);
+            if (!animationFrameId) {
+                animationFrameId = requestAnimationFrame(() => {
+                    revealSpoilers();
+                    animationFrameId = null;
+                });
+            }
         });
         observer.observe(document.body, {
             childList: true,
@@ -70,7 +78,10 @@
             observer.disconnect();
             observer = null;
         }
-        clearTimeout(timeout);
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
     }
 
     // Initialize based on stored state
